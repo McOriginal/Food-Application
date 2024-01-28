@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:food_app/color/my_colors.dart';
 import 'package:food_app/user/screen/food_categorie_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -36,7 +35,6 @@ class _HomePageState extends State<HomePage> {
           });
         },
         iconSize: 30,
-        
         items: const [
           BottomNavigationBarItem(
             label: "Menu",

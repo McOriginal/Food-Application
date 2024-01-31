@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_app/user/screen/food_categorie_screen.dart';
+import 'package:food_app/user/screen/creat_acount.dart';
 import 'package:food_app/validator_button.dart';
 
 class PageIntroAnimation extends StatefulWidget {
@@ -124,7 +124,7 @@ class _PageIntroAnimationState extends State<PageIntroAnimation> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const FoodHomeScreen()));
+                                builder: (context) => const CreatAcountPage()));
                       },
                     ))
                 : Positioned(

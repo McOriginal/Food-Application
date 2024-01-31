@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:food_app/color/my_colors.dart';
 import 'package:food_app/user/screen/food_categorie_screen.dart';
 import 'package:food_app/user/screen/panier_view.dart';
+import 'package:food_app/user/screen/profile_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,9 +22,7 @@ class _HomePageState extends State<HomePage> {
     const Center(
       child: Text("Favoris"),
     ),
-    const Center(
-      child: Text("Profile"),
-    ),
+    const ProfileView(),
     const PanierView(),
   ];
   // ***************
@@ -41,32 +41,34 @@ class _HomePageState extends State<HomePage> {
         },
         iconSize: 30,
         backgroundColor: AppColors.mainColor,
-        elevation: 5,
-        selectedLabelStyle: TextStyle(
+        elevation: 1,
+        selectedLabelStyle: const TextStyle(
           color: Colors.black,
         ),
         selectedItemColor: AppColors.secondaryColor,
         unselectedItemColor: AppColors.iconColor,
-        items: const [
+        items: [
           BottomNavigationBarItem(
+            tooltip: "AAAAAAA",
+            backgroundColor: Colors.white.withOpacity(0.7),
             label: "Menu",
-            icon: Icon(
+            icon: const Icon(
               Icons.home,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             label: "Favoris",
             icon: Icon(
               Icons.favorite,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             label: "Profile",
             icon: Icon(
               Icons.person,
             ),
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             label: "Panier",
             icon: Icon(
               Icons.shopping_cart,

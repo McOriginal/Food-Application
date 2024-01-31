@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_app/user/screen/creat_acount.dart';
+import 'package:food_app/page_intro.dart';
+import 'package:food_app/user/screen/food_categorie_screen.dart';
 
 class InitStateScreen extends StatefulWidget {
   const InitStateScreen({super.key});
@@ -15,11 +17,26 @@ class _InitStateScreenState extends State<InitStateScreen> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void changeScreen() async {
-    await Future.delayed(
-      const Duration(seconds: 3),
-    ).whenComplete(() => Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const CreatAcountPage())));
+    try {
+      await Future.delayed(
+        const Duration(seconds: 3),
+      ).whenComplete(
+        () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PageIntroAnimation(),
+          ),
+        ),
+      );
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override

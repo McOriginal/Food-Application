@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:food_app/admin_connexion_page.dart';
-import 'package:food_app/user/screen/home_page.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:food_app/color/my_colors.dart';
-import 'package:food_app/user/screen/creat_acount.dart';
-import 'package:food_app/user/screen/food_categorie_screen.dart';
+import 'package:food_app/user/screen/dashboard_view.dart';
+import 'package:food_app/user/screen/inscription_admin.dart';
 import 'package:food_app/user/screen/scaffold_messanger.dart';
 import 'package:food_app/validator_button.dart';
 
-class ConnexionPage extends StatefulWidget {
-  const ConnexionPage({super.key});
+class AdminConnexionPage extends StatefulWidget {
+  const AdminConnexionPage({super.key});
 
   @override
-  State<ConnexionPage> createState() => _ConnexionPageState();
+  State<AdminConnexionPage> createState() => _ConnexionPageState();
 }
 
-class _ConnexionPageState extends State<ConnexionPage> {
+class _ConnexionPageState extends State<AdminConnexionPage> {
 // ------------------------------
   bool isVisible = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
-  final TextEditingController _addresseEmail = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  // final TextEditingController _addresseEmail = TextEditingController();
+  // final TextEditingController _password = TextEditingController();
   bool circleProcessing = false;
-  late String _userID;
+  late String emailAdmin;
+  late String passwordAdmin;
+  late String _adminID;
 // ------------------------------
 
   @override
@@ -47,7 +46,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 ),
                 Center(
                   child: Text(
-                    "Connexion",
+                    "Acceder au panneau \n Admin",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       letterSpacing: 3,
@@ -85,7 +84,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                 ),
                               ),
                               TextFormField(
-                                controller: _addresseEmail,
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
                                   focusedBorder: OutlineInputBorder(
@@ -111,8 +109,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                   ),
                                 ),
                                 validator: (value) {
-                                  if (value!.trim().isEmpty ||
-                                      value.isValidEmail() == false) {
+                                  if (value!.trim().isEmpty) {
                                     SnackBarMessanger.showSnackBar(
                                       _scaffoldKey,
                                       "Votre Email n'est pas valide",
@@ -121,8 +118,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                   }
                                   return null;
                                 },
-                                onSaved: (value) {
-                                  _addresseEmail.text = value!;
+                                onChanged: (value) {
+                                  emailAdmin = value;
                                 },
                               ),
                             ],
@@ -154,8 +151,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
                               Stack(
                                 children: [
                                   TextFormField(
-                                    controller: _password,
-                                    keyboardType: TextInputType.text,
                                     decoration: InputDecoration(
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
@@ -180,6 +175,19 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                       ),
                                     ),
                                     obscureText: isVisible,
+                                    validator: (value) {
+                                      if (value!.trim().isEmpty) {
+                                        setState(() {
+                                          circleProcessing = false;
+                                        });
+
+                                        return "Votre Mot de passe n'est pas valide";
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (value) {
+                                      passwordAdmin = value;
+                                    },
                                   ),
                                   isVisible
                                       ? Positioned(
@@ -227,7 +235,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             const Text(
-                              "Vous n'avez de compte ?",
+                              "Vous n'êtes pas admin ?",
                               style: TextStyle(
                                   fontFamily: "Sora-VariableFont_wght"),
                             ),
@@ -238,7 +246,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          const CreatAcountPage(),
+                                          const InscriptionAdmin(),
                                     ));
                               },
                               child: Text(
@@ -259,178 +267,20 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           ? CircularProgressIndicator(
                               color: AppColors.mainColor,
                             )
-                          : GestureDetector(
-                              onLongPress: () {
-                                showDialog(
-                                    barrierDismissible: false,
-                                    context: context,
-                                    builder: (_) {
-                                      return AlertDialog(
-                                        title: Text(
-                                          "Êtes vous Admin ?",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textColor,
-                                          ),
-                                        ),
-                                        actions: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  "NON",
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    color: AppColors.mainColor,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const AdminConnexionPage(),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Text(
-                                                  "OUI",
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    color: AppColors.textColor,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    });
-                              },
-                              onTap: saveLogin,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 15, left: 15),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.5,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.deepOrange,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        blurStyle: BlurStyle.solid,
-                                        offset: Offset(2, 2),
-                                        color: Colors.grey,
-                                        blurRadius: 5,
-                                      )
-                                    ],
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      "Se Connecter",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        letterSpacing: 1,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                          : ValidatorButton(
+                              text: "Se Connecter",
+                              textStyle: const TextStyle(
+                                letterSpacing: 1,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
+                              color: Colors.deepOrange,
+                              function: saveLogin,
                             ),
-                      // : ValidatorButton(
-                      //     text: "Se Connecter",
-                      //     textStyle: const TextStyle(
-                      //       letterSpacing: 1,
-                      //       fontSize: 20,
-                      //       fontWeight: FontWeight.bold,
-                      //       color: Colors.white,
-                      //     ),
-                      //     color: Colors.deepOrange,
-                      //     function: () {
-                      //       saveLogin();
-                      //     },
-                      //   ),
                     ],
                   ),
                 ),
-                // ************************
-                // ************************
-                // ----------------------- Ou  ----------------
-                // ************************
-                // ************************
-                const SizedBox(height: 15),
-
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 20, right: 20, left: 20, bottom: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child:
-                              Divider(thickness: 1, color: AppColors.iconColor),
-                        ),
-                      ),
-                      Text(
-                        "Ou continuer avec ",
-                        style: TextStyle(
-                          letterSpacing: 1,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textColor,
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child:
-                              Divider(thickness: 1, color: AppColors.iconColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                circleProcessing == true
-                    ? CircularProgressIndicator(
-                        color: AppColors.mainColor,
-                      )
-                    : Padding(
-                        padding:
-                            const EdgeInsets.only(right: 15, left: 15, top: 2),
-                        child: InkWell(
-                          onTap: () {
-                            signInWithGoogle();
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.iconColor),
-                            ),
-                            child: Image.asset(
-                              "assets/images/g.png",
-                              width: 60,
-                            ),
-                          ),
-                        ),
-                      ),
               ],
             ),
           ),
@@ -439,51 +289,8 @@ class _ConnexionPageState extends State<ConnexionPage> {
     );
   }
 
-// ********************* Connexion avec Google *************
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection("users");
-
-  Future<UserCredential> signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance
-        .signInWithCredential(credential)
-        .whenComplete(() async {
-      _userID = FirebaseAuth.instance.currentUser!.uid;
-      // print(googleAuth);
-      // print(FirebaseAuth.instance.currentUser!.uid);
-      // print(googleUser);
-      // print(googleUser!.id);
-      // print(googleAuth);
-      await userCollection.doc(_userID).set({
-        'id': _userID,
-        'name': googleUser!.displayName,
-        'email': googleUser.email,
-        'profileImageUrl': googleUser.photoUrl,
-      }).then(
-        (value) => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        ),
-      );
-    });
-  }
-
-// ********************* Connexion avec Google *************
+  CollectionReference adminsCollection =
+      FirebaseFirestore.instance.collection("admins");
 
   // ************* Save Connexion **************
 
@@ -496,14 +303,14 @@ class _ConnexionPageState extends State<ConnexionPage> {
         // final credential =
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(
-              email: _addresseEmail.text,
-              password: _password.text,
+              email: emailAdmin,
+              password: passwordAdmin,
             )
             .then(
               (value) => Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FoodHomeScreen(),
+                  builder: (context) => const DashBoardView(),
                 ),
               ),
             );

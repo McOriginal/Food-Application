@@ -1,7 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/page_intro.dart';
-import 'package:food_app/user/screen/food_categorie_screen.dart';
 
 class InitStateScreen extends StatefulWidget {
   const InitStateScreen({super.key});

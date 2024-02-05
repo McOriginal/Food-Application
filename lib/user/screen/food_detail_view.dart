@@ -33,7 +33,7 @@ class _FoodDetailViewState extends State<FoodDetailView> {
                       offset: Offset(-3, 4),
                       color: Colors.grey,
                       blurRadius: 10,
-                    )
+                    ),
                   ],
                   image: DecorationImage(
                     image: AssetImage(

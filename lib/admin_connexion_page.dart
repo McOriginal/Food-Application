@@ -296,7 +296,7 @@ class _ConnexionPageState extends State<AdminConnexionPage> {
 
   void saveLogin() async {
     setState(() {
-      circleProcessing == true;
+      circleProcessing = true;
     });
     if (_formKey.currentState!.validate()) {
       try {

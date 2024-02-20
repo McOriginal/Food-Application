@@ -1,10 +1,15 @@
-import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_app/color/my_colors.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:food_app/user/screen/scaffold_messanger.dart';
+import 'package:path/path.dart' as path;
+
+import 'package:food_app/color/my_colors.dart';
 import 'package:food_app/validator_button.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class UploadProduit extends StatefulWidget {
   const UploadProduit({super.key});
@@ -21,10 +26,17 @@ class _UploadProduitState extends State<UploadProduit> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   GlobalKey<ScaffoldMessengerState> scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
-  late double foodPrice;
-  late String foodName;
-  late String foodDescription;
+
+  bool circularProgressBar = false;
+  // ###########################
+  late String produitID;
   String selectedCategory = "Petit Déjeuner";
+  late String produitName;
+  late double produitPrice;
+  late String produitDescription;
+  final _picker = ImagePicker();
+  List<XFile> listImage = [];
+  List<String> imageUrlList = [];
 // ***********************************
   @override
   Widget build(BuildContext context) {
@@ -117,7 +129,7 @@ class _UploadProduitState extends State<UploadProduit> {
                               return null;
                             },
                             onSaved: (value) {
-                              foodName = value!;
+                              produitName = value!;
                             },
                           ),
                         ),
@@ -137,7 +149,7 @@ class _UploadProduitState extends State<UploadProduit> {
                               return null;
                             },
                             onSaved: (value) {
-                              foodPrice = double.parse(value!);
+                              produitPrice = double.parse(value!);
                             },
                           ),
                         ),
@@ -157,7 +169,7 @@ class _UploadProduitState extends State<UploadProduit> {
                               return null;
                             },
                             onSaved: (value) {
-                              foodDescription = value!;
+                              produitDescription = value!;
                             },
                           ),
                         ),
@@ -209,6 +221,7 @@ class _UploadProduitState extends State<UploadProduit> {
                         ),
                         const SizedBox(height: 40),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             SizedBox(
                               width: 120,
@@ -225,20 +238,26 @@ class _UploadProduitState extends State<UploadProduit> {
                                 function: cancelUpload,
                               ),
                             ),
-                            Expanded(
-                              child: ValidatorButton(
-                                color: AppColors.secondaryColor,
-                                text: "Valider",
-                                textStyle: const TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: "Gloock-Regular",
-                                  letterSpacing: 2,
-                                  color: Colors.white,
-                                ),
-                                function: uploadProduct,
-                              ),
-                            ),
+                            circularProgressBar == true
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.green,
+                                    ),
+                                  )
+                                : Expanded(
+                                    child: ValidatorButton(
+                                      color: AppColors.secondaryColor,
+                                      text: "Valider",
+                                      textStyle: const TextStyle(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "Gloock-Regular",
+                                        letterSpacing: 2,
+                                        color: Colors.white,
+                                      ),
+                                      function: uploadProduct,
+                                    ),
+                                  ),
                           ],
                         ),
                       ],
@@ -311,30 +330,130 @@ class _UploadProduitState extends State<UploadProduit> {
     formKey.currentState!.reset();
   }
 
-  void uploadProduct() {
+//************ Upload Images in Firebase **************
+
+  Future<void> uploadImages() async {
+    setState(() {
+      circularProgressBar == true;
+    });
     try {
       if (formKey.currentState!.validate()) {
-        formKey.currentState!.save();
         if (listImage.isNotEmpty) {
-          // SnackBarMessanger.showSnackBar(
-          //   scaffoldKey,
-          //   "Veuillez sélectionner les images",
-          //   Colors.red,
-          // );
-
-          print(foodName);
-          print(foodPrice);
-          print(foodDescription);
+          formKey.currentState!.save();
+          for (var image in listImage) {
+            firebase_storage.Reference reference = firebase_storage
+                .FirebaseStorage.instance
+                .ref("produitsImages/${path.basename(image.path)}");
+            await reference.putFile(File(image.path)).whenComplete(() async {
+              await reference.getDownloadURL().then((value) {
+                imageUrlList.add(value);
+              });
+            });
+          }
+        } else if (listImage.isEmpty) {
           setState(() {
-            listImage = [];
+            circularProgressBar == false;
           });
+          SnackBarMessanger.showSnackBar(
+            scaffoldKey,
+            "Veuillez sélectionner les images",
+            Colors.red,
+          );
         }
+        return;
       }
     } catch (e) {
+      setState(() {
+        circularProgressBar == false;
+      });
+      SnackBarMessanger.showSnackBar(
+        scaffoldKey,
+        e.toString(),
+        Colors.red,
+      );
       print(e);
     }
   }
 
+  // ************ Upload Data in Firebase ****************
+  Future<void> uploadData() async {
+    try {
+      if (formKey.currentState!.validate()) {
+        if (listImage.isNotEmpty) {
+          formKey.currentState!.save();
+          CollectionReference productRef =
+              FirebaseFirestore.instance.collection("produits");
+          produitID = const Uuid().v4();
+          await productRef
+              .doc(produitID)
+              .set(({
+                "adminID": FirebaseAuth.instance.currentUser!.uid,
+                "produitID": produitID,
+                "category": selectedCategory,
+                "produitName": produitName,
+                "produitPrice": produitPrice,
+                "produitDescription": produitDescription,
+                "produitImages": imageUrlList,
+              }))
+              .whenComplete(() {
+            setState(() {
+              circularProgressBar == false;
+              imageUrlList = [];
+              listImage = [];
+              formKey.currentState!.reset();
+              SnackBarMessanger.showSnackBar(
+                scaffoldKey,
+                "Produit ajouté avec succès",
+                Colors.green,
+              );
+            });
+          });
+
+          print(produitID);
+          print(produitName);
+          print(produitPrice);
+          print(produitDescription);
+        } else if (listImage.isEmpty) {
+          setState(() {
+            circularProgressBar == false;
+          });
+          SnackBarMessanger.showSnackBar(
+            scaffoldKey,
+            "Veuillez sélectionner les images",
+            Colors.red,
+          );
+        }
+        return;
+      }
+      setState(() {
+        circularProgressBar = false;
+      });
+    } catch (e) {
+      setState(() {
+        circularProgressBar = false;
+      });
+      print(e);
+    }
+    setState(() {
+      circularProgressBar = false;
+    });
+  }
+
+// **************** Upload Produit in On Button Click ************
+  void uploadProduct() async {
+    setState(() {
+      circularProgressBar = true;
+    });
+    await uploadImages().whenComplete(
+      () => uploadData().whenComplete(
+        () => setState(() {
+          circularProgressBar = false;
+        }),
+      ),
+    );
+  }
+
+// **************** Selected Images **************
   showListImages() {
     if (listImage.isNotEmpty) {
       return ListView.separated(
@@ -365,8 +484,6 @@ class _UploadProduitState extends State<UploadProduit> {
     }
   }
 
-  final _picker = ImagePicker();
-  List<XFile> listImage = [];
   void selectImages() async {
     try {
       final select = await _picker.pickMultiImage(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:food_app/admin_connexion_page.dart';
+import 'package:food_app/upload_produit.dart';
 import 'firebase_options.dart';
 
 import 'package:food_app/user/screen/init_screen.dart';
@@ -23,14 +25,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Food App',
-      home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return const HomePage();
-            }
-            return const InitStateScreen();
-          }),
+      home:
+           AdminConnexionPage(),
+          // StreamBuilder(
+          //     stream: FirebaseAuth.instance.authStateChanges(),
+          //     builder: (context, snapshot) {
+          //       if (snapshot.hasData) {
+          //         print("User ID = ${FirebaseAuth.instance.currentUser!.uid}");
+          //         return const HomePage();
+          //       }
+          //       return const InitStateScreen();
+          //     }),
     );
   }
 }

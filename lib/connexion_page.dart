@@ -7,9 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:food_app/color/my_colors.dart';
 import 'package:food_app/user/screen/creat_acount.dart';
-import 'package:food_app/user/screen/food_categorie_screen.dart';
 import 'package:food_app/user/screen/scaffold_messanger.dart';
-import 'package:food_app/validator_button.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({super.key});
@@ -416,9 +414,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                         padding:
                             const EdgeInsets.only(right: 15, left: 15, top: 2),
                         child: InkWell(
-                          onTap: () {
-                            signInWithGoogle();
-                          },
+                          onTap: signInWithGoogle,
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
@@ -503,12 +499,12 @@ class _ConnexionPageState extends State<ConnexionPage> {
               (value) => Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FoodHomeScreen(),
+                  builder: (context) => const HomePage(),
                 ),
               ),
             );
 // ************* Effacer les données ****************
-        _formKey.currentState!.reset();
+        // _formKey.currentState!.reset();
 // ************* Effacer les données ****************
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {

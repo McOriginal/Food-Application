@@ -346,9 +346,7 @@ class _CreatAcountState extends State<CreatAcountPage> {
                                 color: Colors.white,
                               ),
                               color: Colors.deepOrange,
-                              function: () {
-                                saveNewUser();
-                              },
+                              function: saveNewUser,
                             ),
                     ],
                   ),

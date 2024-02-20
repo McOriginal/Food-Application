@@ -25,17 +25,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Food App',
-      home:
-           AdminConnexionPage(),
-          // StreamBuilder(
-          //     stream: FirebaseAuth.instance.authStateChanges(),
-          //     builder: (context, snapshot) {
-          //       if (snapshot.hasData) {
-          //         print("User ID = ${FirebaseAuth.instance.currentUser!.uid}");
-          //         return const HomePage();
-          //       }
-          //       return const InitStateScreen();
-          //     }),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              // print("User ID = ${FirebaseAuth.instance.currentUser!.uid}");
+              return const HomePage();
+            }
+            return const InitStateScreen();
+          }),
     );
   }
 }
